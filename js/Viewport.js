@@ -10,11 +10,13 @@ export default class Viewport {
 
   render() {
     let { ctx, x, y, width, height, elements } = this;
+    for (let element of elements) element.render();        
     ctx.beginPath();
     ctx.strokeStyle = 'red';
     ctx.rect(x, y, width, height);
     ctx.stroke();
     ctx.closePath();
-    for(let element of elements) element.render();    
   }
+
+
 }
