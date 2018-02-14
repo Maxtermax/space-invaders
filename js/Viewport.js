@@ -8,9 +8,12 @@ export default class Viewport {
     this.elements = [];
   }
 
-  render() {
+  render(midlewares = []) {
     let { ctx, x, y, width, height, elements } = this;
-    for (let element of elements) element.render();        
+    elements.forEach((element, index, entire) => {
+      midlewares.forEach(midleware => midleware(element, index, entire));
+      element.render();
+    })
     ctx.beginPath();
     ctx.strokeStyle = 'red';
     ctx.rect(x, y, width, height);
