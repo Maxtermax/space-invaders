@@ -1,8 +1,15 @@
 {
+  "name": "space-invaders",
+  "private": true,
+  "version": "0.0.0",
   "scripts": {
-    "start":"./node_modules/.bin/lite-server"    
+    "start": "node app.js",
+    "dev": "./node_modules/.bin/lite-server"
   },
   "devDependencies": {
     "lite-server": "^2.3.0"
+  },
+  "dependencies": {
+    "express": "^4.16.2"
   }
 }
