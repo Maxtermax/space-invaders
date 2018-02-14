@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "start": "node app.js",
-    "dev": "./node_modules/.bin/lite-server"
+    "dev": "./node_modules/.bin/lite-server -c config.js"
   },
   "devDependencies": {
     "lite-server": "^2.3.0"

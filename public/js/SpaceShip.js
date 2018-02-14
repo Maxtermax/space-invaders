@@ -79,7 +79,7 @@ export default class SpaceShip {
 
   shouldFire() {
     let invaders = this.viewport.elements.filter(({ type }) => type === 'invader');
-    return invaders.filter(invader => invader.points === 5).every(invader => Math.random() < 0.7);
+    return invaders.every(invader => Math.random() < 0.7);
   }
 
   checkCollition(bullet, index, entire, item, i, all) {
@@ -118,7 +118,7 @@ export default class SpaceShip {
     ctx.fillRect(x, y, width, height);
     ctx.closePath();
     this.updateBullets();
-    this.drawBullets();
+    this.drawBullets(false);
     if (this.type === 'invader' && this.shouldFire()) {
       this.addBullet();
     }
