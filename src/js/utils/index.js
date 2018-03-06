@@ -5,8 +5,8 @@ export const calcCenter = (container, item) => {
 }
 
 export const isOverLapping = (a, b) => {
-  let x = (a.x >= b.x) && (a.x <= b.x+b.width);
-  let y = (a.y >= b.y) && (a.y <= b.y + b.height);
+  let x = (a.x >= b.x) && (a.x <= b.x+(b.width || b.bulletWidth));
+  let y = (a.y >= b.y) && (a.y <= b.y + (b.height || b.bulletHeight));
   return x && y;
 }
 

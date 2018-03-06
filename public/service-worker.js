@@ -1,7 +1,8 @@
 let CACHE_NAME = 'v2';
 let urlsToCache = [
   '/',
-  '/bundle.js',
+  '/invaders-sprites.gif',
+  '/bundle.js',  
   '/app.css'
 ];
 
