@@ -3,7 +3,7 @@ import Explotion from './Explotion.js';
 import { isOverLapping } from './utils/index.js';
 
 export default class SpaceShip {
-  constructor(ctx, width, height, x, y, color = 'red', elements = [], viewport, type = 'invader') {
+  constructor(ctx, width, height, x, y, color = 'red', elements = [], viewport, type = 'invader', skin) {
     this.width = width;
     this.height = height;
     this.x = x;
@@ -19,28 +19,20 @@ export default class SpaceShip {
     this.type = type;
     this.points = 5;
     this.bulletsMomentum = 2 + Math.random();
-    this.skin = new Image();
-    this.loadSprites(this.skin);
+    this.skin = skin;
     this.stime = 0;
-    this.skinType = 'a';    
-  }
-
-  async loadSprites(skin) {
-    await fetch('/invaders-sprites.gif')
-      .then(response => response.blob())
-      .then(myBlob => {        
-        skin.src = URL.createObjectURL(myBlob);
-      })
+    this.skinType = 'a';   
   }
 
   addBullet(data = {}) {
     let bulletWidth = 3;
-    let bulletHeight = 35;
+    let bulletHeight = 30;
     let owner = this;
     let {
       x = this.x + (this.width / 2) - (bulletWidth / 2),
-      y = this.y + this.height
+      y = this.y + this.height 
     } = data;
+    if(this.type === 'defender') y = this.y - bulletHeight;
     let text = new TextBox(this.ctx, x, y, `y=${y}`, '12px arial', true);
     this.bullets.push({ bulletWidth, bulletHeight, x, y, text, owner, type: 'bullet' });    
   }
@@ -96,7 +88,10 @@ export default class SpaceShip {
 
   shouldFire() {
     let invaders = this.viewport.elements.filter(({ type }) => type === 'invader');
-    return invaders.every(invader => Math.random() < 0.7);
+    let fireRate = 0.7;    
+    if(invaders.length < 15) fireRate = 0.5;
+    if(invaders.length < 5) fireRate = 0.1;    
+    return invaders.every(invader => Math.random() < fireRate);
   }
 
   checkCollition(bullet, index, entire, item, i, all) {

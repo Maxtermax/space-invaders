@@ -34,14 +34,12 @@ class Universe extends Controls {
 
   render() {
     let game = setInterval(() => {
-      clear(canvas);
-      /*      
-      let invaders = viewport.elements.filter(element => element.type === 'invader');
-      let defender = viewport.elements.filter(element => element.type === 'defender')[0];
-      //console.log(defender.points);
+      clear(canvas);            
+      let invaders = viewport.get('invader');
+      let defender = viewport.get('defender')[0];      
       if (defender.points < 0 || invaders.length && invaders.some(invader => invader.y >= (viewport.height + viewport.y))) {
         alert("you lose");
-        /window.location.reload();
+        window.location.reload();
         return clearInterval(game);
       }
 
@@ -50,7 +48,7 @@ class Universe extends Controls {
         window.location.reload();
         return clearInterval(game);
       }
-      */
+      
       this.update();
     }, this.FPS)
   }
@@ -92,12 +90,12 @@ class Universe extends Controls {
     
   }
 
-  loadInvaders({rows = 0, x, y, width, height, padding}) {
+  loadInvaders({rows = 0, x, y, width, height, padding, skin}) {
     const color = 'white';
     ctx.beginPath();
     for(let i = 0; i < rows;i++) {
       x += width + padding;
-      let invaderRow = new Invader(ctx, width, height, x, y, color, [new TextBox(ctx, x, y + padding, 'Hola mundo', true)], viewport);
+      let invaderRow = new Invader(ctx, width, height, x, y, color, [new TextBox(ctx, x, y + padding, 'Hola mundo', true)], viewport, skin);
       viewport.elements.push(invaderRow);      
     }
     ctx.closePath();
@@ -117,7 +115,15 @@ class Universe extends Controls {
     viewport.elements.push(defender);
   }
 
-  preload() {
+  loadSprites(skin) {
+    return fetch('/invaders-sprites.gif')
+      .then(response => response.blob())
+      .then(myBlob => {
+        skin.src = URL.createObjectURL(myBlob);
+      })
+  }
+
+  async preload() {
     const colums = 10;
     const padding = 5;
     const width = 25;
@@ -126,8 +132,10 @@ class Universe extends Controls {
     const y = viewport.y + width - 20;
     let rows = Math.floor(vp.width/(width + padding))-1;    
     const HOW_MANY = 4;
+    let skin = new Image();
+    await this.loadSprites(skin);    
     for(let i = 0; i < HOW_MANY; i++) {
-      this.loadInvaders({rows, x, y: y+(25*i), width, height, padding});        
+      this.loadInvaders({ rows, x, y: y + (25 * i), width, height, padding, skin});        
     }
     this.loadDefender();
     this.startControls();
@@ -148,7 +156,7 @@ class Universe extends Controls {
 let space = new Universe();
 space.preload();
 space.render();
-
+/*
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js').then(function (registration) {
     // Registration was successful
@@ -158,4 +166,4 @@ if ('serviceWorker' in navigator) {
     console.log('ServiceWorker registration failed: ', err);
   });
 }
-
+*/

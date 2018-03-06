@@ -19,6 +19,6 @@ export default class Explotion {
     ctx.closePath();
     this.r += 0.5+Math.random();    
     this.light -= 0.08; 
-    this.duration -= 1;
+    this.duration -= 0.5;
   }
 }

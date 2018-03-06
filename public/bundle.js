@@ -1027,14 +1027,6 @@ var _getIterator2 = __webpack_require__(34);
 
 var _getIterator3 = _interopRequireDefault(_getIterator2);
 
-var _regenerator = __webpack_require__(115);
-
-var _regenerator2 = _interopRequireDefault(_regenerator);
-
-var _asyncToGenerator2 = __webpack_require__(118);
-
-var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-
 var _classCallCheck2 = __webpack_require__(7);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
@@ -1061,6 +1053,7 @@ var SpaceShip = function () {
     var elements = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : [];
     var viewport = arguments[7];
     var type = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : 'invader';
+    var skin = arguments[9];
     (0, _classCallCheck3.default)(this, SpaceShip);
 
     this.width = width;
@@ -1078,54 +1071,25 @@ var SpaceShip = function () {
     this.type = type;
     this.points = 5;
     this.bulletsMomentum = 2 + Math.random();
-    this.skin = new Image();
-    this.loadSprites(this.skin);
+    this.skin = skin;
     this.stime = 0;
     this.skinType = 'a';
   }
 
   (0, _createClass3.default)(SpaceShip, [{
-    key: 'loadSprites',
-    value: function () {
-      var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(skin) {
-        return _regenerator2.default.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                _context.next = 2;
-                return fetch('/invaders-sprites.gif').then(function (response) {
-                  return response.blob();
-                }).then(function (myBlob) {
-                  skin.src = URL.createObjectURL(myBlob);
-                });
-
-              case 2:
-              case 'end':
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      function loadSprites(_x4) {
-        return _ref.apply(this, arguments);
-      }
-
-      return loadSprites;
-    }()
-  }, {
     key: 'addBullet',
     value: function addBullet() {
       var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
       var bulletWidth = 3;
-      var bulletHeight = 35;
+      var bulletHeight = 30;
       var owner = this;
       var _data$x = data.x,
           x = _data$x === undefined ? this.x + this.width / 2 - bulletWidth / 2 : _data$x,
           _data$y = data.y,
           y = _data$y === undefined ? this.y + this.height : _data$y;
 
+      if (this.type === 'defender') y = this.y - bulletHeight;
       var text = new _TextBox2.default(this.ctx, x, y, 'y=' + y, '12px arial', true);
       this.bullets.push({ bulletWidth: bulletWidth, bulletHeight: bulletHeight, x: x, y: y, text: text, owner: owner, type: 'bullet' });
     }
@@ -1138,10 +1102,10 @@ var SpaceShip = function () {
           bullets = this.bullets,
           viewport = this.viewport;
 
-      this.bullets = bullets.filter(function (_ref2) {
-        var bulletHeight = _ref2.bulletHeight,
-            y = _ref2.y,
-            x = _ref2.x;
+      this.bullets = bullets.filter(function (_ref) {
+        var bulletHeight = _ref.bulletHeight,
+            y = _ref.y,
+            x = _ref.x;
 
         if (_this.type === 'defender' && y <= 0) return false;
         if (y + bulletHeight <= viewport.y + viewport.height) return true;
@@ -1266,12 +1230,15 @@ var SpaceShip = function () {
   }, {
     key: 'shouldFire',
     value: function shouldFire() {
-      var invaders = this.viewport.elements.filter(function (_ref3) {
-        var type = _ref3.type;
+      var invaders = this.viewport.elements.filter(function (_ref2) {
+        var type = _ref2.type;
         return type === 'invader';
       });
+      var fireRate = 0.7;
+      if (invaders.length < 15) fireRate = 0.5;
+      if (invaders.length < 5) fireRate = 0.1;
       return invaders.every(function (invader) {
-        return Math.random() < 0.7;
+        return Math.random() < fireRate;
       });
     }
   }, {
@@ -1430,6 +1397,14 @@ var _getIterator2 = __webpack_require__(34);
 
 var _getIterator3 = _interopRequireDefault(_getIterator2);
 
+var _regenerator = __webpack_require__(115);
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _asyncToGenerator2 = __webpack_require__(118);
+
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
 var _getPrototypeOf = __webpack_require__(46);
 
 var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
@@ -1521,21 +1496,22 @@ var Universe = function (_Controls) {
 
       var game = setInterval(function () {
         (0, _index.clear)(canvas);
-        /*      
-        let invaders = viewport.elements.filter(element => element.type === 'invader');
-        let defender = viewport.elements.filter(element => element.type === 'defender')[0];
-        //console.log(defender.points);
-        if (defender.points < 0 || invaders.length && invaders.some(invader => invader.y >= (viewport.height + viewport.y))) {
+        var invaders = viewport.get('invader');
+        var defender = viewport.get('defender')[0];
+        if (defender.points < 0 || invaders.length && invaders.some(function (invader) {
+          return invader.y >= viewport.height + viewport.y;
+        })) {
           alert("you lose");
-          /window.location.reload();
+          window.location.reload();
           return clearInterval(game);
         }
-         if (invaders.length === 0) {
+
+        if (invaders.length === 0) {
           alert("you win");
           window.location.reload();
           return clearInterval(game);
         }
-        */
+
         _this2.update();
       }, this.FPS);
     }
@@ -1591,13 +1567,14 @@ var Universe = function (_Controls) {
           y = _ref.y,
           width = _ref.width,
           height = _ref.height,
-          padding = _ref.padding;
+          padding = _ref.padding,
+          skin = _ref.skin;
 
       var color = 'white';
       ctx.beginPath();
       for (var i = 0; i < rows; i++) {
         x += width + padding;
-        var invaderRow = new _Invader2.default(ctx, width, height, x, y, color, [new _TextBox2.default(ctx, x, y + padding, 'Hola mundo', true)], viewport);
+        var invaderRow = new _Invader2.default(ctx, width, height, x, y, color, [new _TextBox2.default(ctx, x, y + padding, 'Hola mundo', true)], viewport, skin);
         viewport.elements.push(invaderRow);
       }
       ctx.closePath();
@@ -1618,22 +1595,56 @@ var Universe = function (_Controls) {
       viewport.elements.push(defender);
     }
   }, {
-    key: 'preload',
-    value: function preload() {
-      var colums = 10;
-      var padding = 5;
-      var width = 25;
-      var height = 20;
-      var x = viewport.x - 20;
-      var y = viewport.y + width - 20;
-      var rows = Math.floor(vp.width / (width + padding)) - 1;
-      var HOW_MANY = 4;
-      for (var i = 0; i < HOW_MANY; i++) {
-        this.loadInvaders({ rows: rows, x: x, y: y + 25 * i, width: width, height: height, padding: padding });
-      }
-      this.loadDefender();
-      this.startControls();
+    key: 'loadSprites',
+    value: function loadSprites(skin) {
+      return fetch('/invaders-sprites.gif').then(function (response) {
+        return response.blob();
+      }).then(function (myBlob) {
+        skin.src = URL.createObjectURL(myBlob);
+      });
     }
+  }, {
+    key: 'preload',
+    value: function () {
+      var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
+        var colums, padding, width, height, x, y, rows, HOW_MANY, skin, i;
+        return _regenerator2.default.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                colums = 10;
+                padding = 5;
+                width = 25;
+                height = 20;
+                x = viewport.x - 20;
+                y = viewport.y + width - 20;
+                rows = Math.floor(vp.width / (width + padding)) - 1;
+                HOW_MANY = 4;
+                skin = new Image();
+                _context.next = 11;
+                return this.loadSprites(skin);
+
+              case 11:
+                for (i = 0; i < HOW_MANY; i++) {
+                  this.loadInvaders({ rows: rows, x: x, y: y + 25 * i, width: width, height: height, padding: padding, skin: skin });
+                }
+                this.loadDefender();
+                this.startControls();
+
+              case 14:
+              case 'end':
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function preload() {
+        return _ref2.apply(this, arguments);
+      }
+
+      return preload;
+    }()
   }, {
     key: 'moveInvaders',
     value: function moveInvaders() {
@@ -1675,7 +1686,7 @@ var Universe = function (_Controls) {
 var space = new Universe();
 space.preload();
 space.render();
-
+/*
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js').then(function (registration) {
     // Registration was successful
@@ -1685,6 +1696,7 @@ if ('serviceWorker' in navigator) {
     console.log('ServiceWorker registration failed: ', err);
   });
 }
+*/
 
 /***/ }),
 /* 56 */
@@ -2072,8 +2084,9 @@ var Invaders = function (_SpaceShip) {
     var color = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 'red';
     var elements = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : [];
     var viewport = arguments[7];
+    var skin = arguments[8];
     (0, _classCallCheck3.default)(this, Invaders);
-    return (0, _possibleConstructorReturn3.default)(this, (Invaders.__proto__ || (0, _getPrototypeOf2.default)(Invaders)).call(this, ctx, width, height, x, y, color = 'white', elements, viewport));
+    return (0, _possibleConstructorReturn3.default)(this, (Invaders.__proto__ || (0, _getPrototypeOf2.default)(Invaders)).call(this, ctx, width, height, x, y, color = 'white', elements, viewport, 'invader', skin));
   }
 
   return Invaders;
@@ -2653,8 +2666,9 @@ var Defender = function (_SpaceShip) {
   function Defender(ctx, width, height, x, y, color) {
     var elements = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : [];
     var viewport = arguments[7];
+    var skin = arguments[8];
     (0, _classCallCheck3.default)(this, Defender);
-    return (0, _possibleConstructorReturn3.default)(this, (Defender.__proto__ || (0, _getPrototypeOf2.default)(Defender)).call(this, ctx, width, height, x, y, 'green', elements = [], viewport, 'defender'));
+    return (0, _possibleConstructorReturn3.default)(this, (Defender.__proto__ || (0, _getPrototypeOf2.default)(Defender)).call(this, ctx, width, height, x, y, 'green', elements = [], viewport, 'defender', skin));
   }
 
   return Defender;
@@ -3151,7 +3165,7 @@ var Explotion = function () {
       ctx.closePath();
       this.r += 0.5 + Math.random();
       this.light -= 0.08;
-      this.duration -= 1;
+      this.duration -= 0.5;
     }
   }]);
   return Explotion;
