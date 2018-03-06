@@ -1047,6 +1047,8 @@ var _index = __webpack_require__(53);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var Shoot = document.getElementById('shoot');
+
 var SpaceShip = function () {
   function SpaceShip(ctx, width, height, x, y) {
     var color = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 'red';
@@ -1081,17 +1083,31 @@ var SpaceShip = function () {
     value: function addBullet() {
       var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var bulletWidth = 3;
-      var bulletHeight = 30;
+      var bulletWidth = 2;
+      var bulletHeight = 35;
       var owner = this;
       var _data$x = data.x,
           x = _data$x === undefined ? this.x + this.width / 2 - bulletWidth / 2 : _data$x,
           _data$y = data.y,
           y = _data$y === undefined ? this.y + this.height : _data$y;
 
-      if (this.type === 'defender') y = this.y - bulletHeight;
+      if (this.type === 'defender') y = this.y - bulletHeight + 10;
       var text = new _TextBox2.default(this.ctx, x, y, 'y=' + y, '12px arial', true);
-      this.bullets.push({ bulletWidth: bulletWidth, bulletHeight: bulletHeight, x: x, y: y, text: text, owner: owner, type: 'bullet' });
+      this.bullets.push({ bulletWidth: bulletWidth, bulletHeight: bulletHeight, x: x, y: y, text: text, owner: owner, type: 'bullet', tail: 0 });
+      //if(this.type === 'defender')
+      this.viewport.elements.push(new _Explotion2.default({
+        ctx: this.ctx,
+        x: this.x + this.width / 2,
+        y: this.y,
+        r: 2,
+        duration: 100,
+        color: {
+          r: 255,
+          g: 255,
+          b: 255
+        }
+      }));
+      Shoot.play();
     }
   }, {
     key: 'updateBullets',
@@ -1117,7 +1133,12 @@ var SpaceShip = function () {
       var debug = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       var ctx = this.ctx,
           bullets = this.bullets,
-          type = this.type;
+          type = this.type,
+          x = this.x,
+          y = this.y,
+          height = this.height,
+          width = this.width,
+          viewport = this.viewport;
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
@@ -1127,27 +1148,29 @@ var SpaceShip = function () {
           var bullet = _step.value;
           var bulletWidth = bullet.bulletWidth,
               bulletHeight = bullet.bulletHeight,
-              x = bullet.x,
-              y = bullet.y,
-              text = bullet.text;
+              _x6 = bullet.x,
+              _y = bullet.y,
+              text = bullet.text,
+              tail = bullet.tail;
 
           ctx.beginPath();
           ctx.fillStyle = 'red';
-          var gradient = ctx.createLinearGradient(x, y, x, y + bulletHeight);
+          if (tail < bulletHeight) bullet.tail += 4;
+          var gradient = ctx.createLinearGradient(_x6, _y, _x6, _y + tail);
           if (type === 'invader') {
-            gradient.addColorStop(0, 'transparent');
-            gradient.addColorStop(1, '#ffffff');
+            gradient.addColorStop(0, '#000b28');
+            gradient.addColorStop(1, 'white');
           } else {
-            gradient.addColorStop(0, '#ffffff');
-            gradient.addColorStop(1, 'transparent');
+            gradient.addColorStop(0, 'white');
+            gradient.addColorStop(1, '#000b28');
           }
           ctx.fillStyle = gradient;
-          ctx.fillRect(x, y, bulletWidth, bulletHeight);
+          ctx.fillRect(_x6, _y, bulletWidth, bulletHeight);
           ctx.closePath();
           if (debug) {
-            text.x = x;
-            text.y = y;
-            text.data = 'y=' + y.toFixed(2);
+            text.x = _x6;
+            text.y = _y;
+            text.data = 'y=' + _y.toFixed(2);
             text.render();
           }
         }
@@ -3134,32 +3157,41 @@ var Explotion = function () {
   function Explotion(_ref) {
     var ctx = _ref.ctx,
         x = _ref.x,
-        y = _ref.y;
+        y = _ref.y,
+        _ref$r = _ref.r,
+        r = _ref$r === undefined ? 5 : _ref$r,
+        _ref$duration = _ref.duration,
+        duration = _ref$duration === undefined ? 25 : _ref$duration,
+        _ref$color = _ref.color,
+        color = _ref$color === undefined ? { r: '255', g: '255', b: '255' } : _ref$color;
     (0, _classCallCheck3.default)(this, Explotion);
 
     this.x = x;
     this.y = y;
     this.ctx = ctx;
-    this.duration = 25;
-    this.r = 5;
+    this.duration = duration;
+    this.r = r;
     this.done = false;
     this.light = 1;
+    this.color = color;
   }
 
   (0, _createClass3.default)(Explotion, [{
-    key: "render",
+    key: 'render',
     value: function render() {
       var ctx = this.ctx,
           x = this.x,
           y = this.y,
           duration = this.duration,
           r = this.r,
-          done = this.done;
+          done = this.done,
+          color = this.color,
+          light = this.light;
 
       if (duration <= 0) this.done = true;
       ctx.beginPath();
       ctx.arc(x, y, r, 0, 2 * Math.PI);
-      ctx.fillStyle = "rgba(255, 255, 255, " + this.light + ")";
+      ctx.fillStyle = 'rgba(' + color.r + ', ' + color.g + ', ' + color.b + ', ' + light + ')';
       ctx.fill();
       ctx.closePath();
       this.r += 0.5 + Math.random();

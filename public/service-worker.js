@@ -2,6 +2,8 @@ let CACHE_NAME = 'v2';
 let urlsToCache = [
   '/',
   '/invaders-sprites.gif',
+  '/shoot.mp3',
+  '/background.wav',
   '/bundle.js',  
   '/app.css'
 ];

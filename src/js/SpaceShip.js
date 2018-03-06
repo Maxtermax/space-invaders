@@ -1,6 +1,7 @@
 import TextBox from './components/TextBox.js';
 import Explotion from './Explotion.js';
 import { isOverLapping } from './utils/index.js';
+const Shoot = document.getElementById('shoot');
 
 export default class SpaceShip {
   constructor(ctx, width, height, x, y, color = 'red', elements = [], viewport, type = 'invader', skin) {
@@ -25,16 +26,30 @@ export default class SpaceShip {
   }
 
   addBullet(data = {}) {
-    let bulletWidth = 3;
-    let bulletHeight = 30;
+    let bulletWidth = 2;
+    let bulletHeight = 35;
     let owner = this;
     let {
       x = this.x + (this.width / 2) - (bulletWidth / 2),
       y = this.y + this.height 
     } = data;
-    if(this.type === 'defender') y = this.y - bulletHeight;
+    if(this.type === 'defender') y = this.y-bulletHeight+10;
     let text = new TextBox(this.ctx, x, y, `y=${y}`, '12px arial', true);
-    this.bullets.push({ bulletWidth, bulletHeight, x, y, text, owner, type: 'bullet' });    
+    this.bullets.push({ bulletWidth, bulletHeight, x, y, text, owner, type: 'bullet', tail: 0 }); 
+    //if(this.type === 'defender')
+     this.viewport.elements.push(new Explotion({
+       ctx: this.ctx, 
+       x: this.x+(this.width/2), 
+       y: this.y,
+       r: 2,
+       duration: 100,
+       color: {
+         r: 255, 
+         g:255, 
+         b: 255         
+       }
+     }));    
+    Shoot.play();   
   }
 
   updateBullets() {
@@ -46,18 +61,19 @@ export default class SpaceShip {
   }
 
   drawBullets(debug = false) {
-    let { ctx, bullets, type } = this;
+    let { ctx, bullets, type, x, y, height, width, viewport } = this;     
     for (let bullet of bullets) {
-      let { bulletWidth, bulletHeight, x, y, text } = bullet;
+      let { bulletWidth, bulletHeight, x, y, text, tail } = bullet;
       ctx.beginPath();
       ctx.fillStyle = 'red';
-      let gradient = ctx.createLinearGradient(x, y, x, y+bulletHeight);
+      if(tail < bulletHeight) bullet.tail += 4;
+      let gradient = ctx.createLinearGradient(x, y, x, y+tail);      
       if(type === 'invader') {         
-         gradient.addColorStop(0, 'transparent');                
-         gradient.addColorStop(1, '#ffffff');
+         gradient.addColorStop(0, '#000b28');                
+         gradient.addColorStop(1, 'white');
       } else {
-         gradient.addColorStop(0, '#ffffff');
-         gradient.addColorStop(1, 'transparent');        
+         gradient.addColorStop(0, 'white');
+         gradient.addColorStop(1, '#000b28');        
       }
       ctx.fillStyle = gradient;
       ctx.fillRect(x, y, bulletWidth, bulletHeight);
