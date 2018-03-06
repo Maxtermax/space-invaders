@@ -1686,7 +1686,7 @@ var Universe = function (_Controls) {
 var space = new Universe();
 space.preload();
 space.render();
-/*
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js').then(function (registration) {
     // Registration was successful
@@ -1696,7 +1696,6 @@ if ('serviceWorker' in navigator) {
     console.log('ServiceWorker registration failed: ', err);
   });
 }
-*/
 
 /***/ }),
 /* 56 */
